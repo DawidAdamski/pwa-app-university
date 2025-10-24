@@ -2,6 +2,8 @@
 
 A Progressive Web App (PWA) for the classic Memory card game, deployed on Kubernetes with ArgoCD for GitOps automation.
 
+![Memory PWA Application](images/memory%20app.png)
+
 ## 🏗️ Architecture
 
 ```
@@ -23,31 +25,33 @@ A Progressive Web App (PWA) for the classic Memory card game, deployed on Kubern
 ### 1. Build and Push Container Image
 
 ```bash
-# Build the container image
-sudo podman build --network=host -t memory-pwa .
+# Build and push the Memory PWA image
+./build-docker.sh
 
-# For minikube, load image directly
-minikube image load memory-pwa
+# Or manually:
+sudo podman build --network=host -t anihilat/pwa-memory:latest source/
+sudo podman push anihilat/pwa-memory:latest
 ```
 
 ### 2. Deploy to Kubernetes
 
 ```bash
-# Create namespace and deploy
-kubectl apply -f k8s/
-
-# Check deployment status
-kubectl get pods -n memory-pwa
-kubectl get services -n memory-pwa
+# Deploy using ArgoCD
+argocd app create memory-pwa \
+  --repo https://github.com/DawidAdamski/pwa-app-university.git \
+  --path k8s \
+  --dest-server https://kubernetes.default.svc \
+  --dest-namespace memory-pwa \
+  --sync-policy automated
 ```
 
 ### 3. Access the Application
 
 ```bash
 # Port forward to access locally
-kubectl port-forward -n memory-pwa service/memory-pwa-service 8080:80
+kubectl port-forward -n memory-pwa service/memory-pwa-service 3000:80
 
-# Access at: http://localhost:8080
+# Access at: http://localhost:3000
 ```
 
 ## 🔄 ArgoCD GitOps Setup
@@ -65,14 +69,7 @@ kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/st
 kubectl wait --for=condition=available --timeout=300s deployment/argocd-server -n argocd
 ```
 
-### 2. Get ArgoCD Admin Password
-
-```bash
-# Get initial admin password
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
-```
-
-### 3. Access ArgoCD UI
+### 2. Access ArgoCD UI
 
 ```bash
 # Port forward ArgoCD server
@@ -80,44 +77,51 @@ kubectl port-forward -n argocd svc/argocd-server 8080:443
 
 # Access ArgoCD at: https://localhost:8080
 # Username: admin
-# Password: (from step 2)
+# Password: (get with kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
 ```
 
-### 4. Create ArgoCD Application
+![ArgoCD Dashboard](images/argocd.png)
+
+### 3. Create ArgoCD Application
 
 ```bash
-# Apply the ArgoCD application
-kubectl apply -f argocd-application.yaml
-
-# Or create via ArgoCD CLI
+# Create application via CLI
 argocd app create memory-pwa \
-  --repo https://github.com/yourusername/memory-pwa.git \
+  --repo https://github.com/DawidAdamski/pwa-app-university.git \
   --path k8s \
   --dest-server https://kubernetes.default.svc \
   --dest-namespace memory-pwa \
   --sync-policy automated
 ```
 
+![ArgoCD Application View](images/argocd2.png)
+
 ## 📁 Repository Structure
 
 ```
 memory-pwa/
-├── k8s/                          # Kubernetes manifests
-│   ├── namespace.yaml           # Namespace definition
-│   ├── deployment.yaml          # Deployment configuration
-│   ├── service.yaml             # Service definition
-│   ├── ingress.yaml             # Ingress configuration
-│   └── kustomization.yaml      # Kustomize configuration
-├── argocd-application.yaml      # ArgoCD application manifest
-├── Dockerfile                   # Container definition
-├── package.json                 # Node.js dependencies
-├── index.html                   # PWA main file
-├── styles.css                   # Application styles
-├── app.js                       # Game logic
-├── sw.js                        # Service worker
-├── manifest.json                # PWA manifest
-├── icons/                       # PWA icons
-└── README.md                    # This file
+├── source/                     # Application source code
+│   ├── index.html             # Main HTML file
+│   ├── styles.css             # Application styles
+│   ├── app.js                 # Game logic
+│   ├── sw.js                  # Service worker
+│   ├── manifest.json          # PWA manifest
+│   ├── package.json           # Dependencies
+│   ├── Dockerfile             # Container definition
+│   ├── icons/                 # PWA icons
+│   └── generate-icons.js     # Icon generation script
+├── k8s/                       # Kubernetes manifests
+│   ├── namespace.yaml         # Namespace definition
+│   ├── deployment.yaml        # Deployment configuration
+│   ├── service.yaml           # Service definition
+│   └── kustomization.yaml     # Kustomize configuration
+├── images/                    # Documentation images
+│   ├── memory app.png         # Application screenshot
+│   ├── argocd.png            # ArgoCD dashboard
+│   └── argocd2.png           # ArgoCD application view
+├── build-docker.sh            # Docker build script
+├── setup-argocd.sh           # ArgoCD setup script
+└── README.md                  # This file
 ```
 
 ## 🔧 Configuration
@@ -128,8 +132,8 @@ memory-pwa/
 
 ### Resource Limits
 
-- **Memory**: 64Mi request, 128Mi limit
-- **CPU**: 50m request, 100m limit
+- **Memory**: 128Mi request, 256Mi limit
+- **CPU**: 50m request, 200m limit
 
 ### Health Checks
 
@@ -140,15 +144,10 @@ memory-pwa/
 
 ### Service Configuration
 
-- **Type**: ClusterIP
+- **Type**: NodePort
 - **Port**: 80 → 3000
+- **NodePort**: 31167 (auto-assigned)
 - **Selector**: app=memory-pwa
-
-### Ingress Configuration
-
-- **Host**: memory-pwa.local
-- **Path**: /
-- **Annotations**: nginx.ingress.kubernetes.io
 
 ## 🔄 GitOps Workflow
 
@@ -175,7 +174,8 @@ argocd app sync --all
 
 ```bash
 # Start development server
-npm run dev
+cd source/
+npm start
 
 # Test PWA features
 # - Install prompt
@@ -187,26 +187,16 @@ npm run dev
 
 ```bash
 # Build container
-sudo podman build --network=host -t memory-pwa .
+./build-docker.sh
 
 # Test locally
-sudo podman run -d --network=host --name memory-pwa-test memory-pwa
+sudo podman run -d --network=host --name memory-pwa-test anihilat/pwa-memory:latest
 ```
 
 ### 3. Deploy to Kubernetes
 
 ```bash
-# Load image to minikube
-minikube image load memory-pwa
-
-# Deploy manifests
-kubectl apply -f k8s/
-```
-
-### 4. GitOps Deployment
-
-```bash
-# Commit and push changes
+# Push changes to GitHub
 git add .
 git commit -m "Update Memory PWA"
 git push origin main
@@ -235,32 +225,23 @@ kubectl get pods -n memory-pwa
 # Service status
 kubectl get svc -n memory-pwa
 
-# Ingress status
-kubectl get ingress -n memory-pwa
-```
-
-### ArgoCD Application Status
-
-```bash
-# Application status
+# ArgoCD application status
 argocd app get memory-pwa
-
-# Application logs
-argocd app logs memory-pwa
 ```
 
 ## 🔒 Security
 
 ### RBAC Configuration
 
-- **Service Account**: memory-pwa
-- **Role**: Limited to memory-pwa namespace
-- **Permissions**: Get, List, Watch, Create, Update, Patch, Delete
+- **Service Account**: default
+- **Namespace**: memory-pwa
+- **Permissions**: Standard pod permissions
 
-### Network Policies
+### Resource Limits
 
-- **Ingress**: Allow from ingress controller
-- **Egress**: Allow to DNS and external APIs
+- **Memory**: 128Mi-256Mi
+- **CPU**: 50m-200m
+- **Health Checks**: Configured
 
 ## 🚨 Troubleshooting
 
@@ -268,8 +249,8 @@ argocd app logs memory-pwa
 
 1. **Image Pull Errors**
    ```bash
-   # Load image to minikube
-   minikube image load memory-pwa
+   # Check if image exists
+   sudo podman images | grep anihilat/pwa-memory
    ```
 
 2. **ArgoCD Sync Issues**
@@ -287,7 +268,7 @@ argocd app logs memory-pwa
    kubectl get endpoints -n memory-pwa
    
    # Port forward for testing
-   kubectl port-forward -n memory-pwa service/memory-pwa-service 8080:80
+   kubectl port-forward -n memory-pwa service/memory-pwa-service 3000:80
    ```
 
 ### Debug Commands
@@ -364,3 +345,13 @@ jobs:
 ## 📄 License
 
 MIT License - see LICENSE file for details.
+
+## 🎉 Success!
+
+Your Memory PWA is now running on Kubernetes with ArgoCD GitOps automation! 
+
+- **Application**: http://localhost:3000 (via port forward)
+- **ArgoCD UI**: https://localhost:8080 (via port forward)
+- **GitHub**: https://github.com/DawidAdamski/pwa-app-university
+
+Enjoy your fully automated GitOps deployment! 🚀
