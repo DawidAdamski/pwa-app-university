@@ -117,4 +117,7 @@ Thumbs.db
 # Local development
 .local
 
+# ArgoCD CLI binary (too large for GitHub)
+argocd-linux-amd64
+
 
