@@ -17,14 +17,14 @@ spec:
     spec:
       containers:
       - name: memory-pwa
-        image: localhost/memory-pwa:latest
-        imagePullPolicy: Never  # Use local image for minikube
+        image: anihilat/pwa-memory:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 3000
         env:
         - name: PORT
           value: "3000"
-        resources:
+      resources:
           requests:
             memory: "64Mi"
             cpu: "50m"
