@@ -9,12 +9,13 @@ resources:
 - service.yaml
 - ingress.yaml
 
-commonLabels:
-  app: memory-pwa
-  version: v1.0.0
+labels:
+- pairs:
+    app: memory-pwa
+    version: v1.0.0
 
 images:
-- name: localhost/memory-pwa
+- name: anihilat/pwa-memory
   newTag: latest
 
 
