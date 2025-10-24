@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory PWA</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="A Progressive Web App for Memory Game">
+    <meta name="theme-color" content="#2196F3">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Memory PWA">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" sizes="32x32" href="icons/icon-32x32.svg">
+    <link rel="icon" type="image/svg+xml" sizes="16x16" href="icons/icon-16x16.svg">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.svg">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <header class="app-header">
+            <h1>🧠 Memory Game</h1>
+            <div class="score-board">
+                <div class="score">Score: <span id="score">0</span></div>
+                <div class="moves">Moves: <span id="moves">0</span></div>
+                <div class="time">Time: <span id="time">00:00</span></div>
+            </div>
+        </header>
+        
+        <main class="game-container">
+            <div class="game-controls">
+                <button id="new-game" class="btn btn-primary">New Game</button>
+                <button id="pause-game" class="btn btn-secondary">Pause</button>
+            </div>
+            
+            <div id="game-board" class="game-board">
+                <!-- Game cards will be generated here -->
+            </div>
+            
+            <div id="game-message" class="game-message"></div>
+        </main>
+        
+        <footer class="app-footer">
+            <p>Memory PWA - Play offline anytime!</p>
+        </footer>
+    </div>
+    
+    <!-- Install Prompt -->
+    <div id="install-prompt" class="install-prompt hidden">
+        <div class="install-content">
+            <h3>Install Memory PWA</h3>
+            <p>Add to your home screen for quick access!</p>
+            <button id="install-btn" class="btn btn-primary">Install</button>
+            <button id="dismiss-install" class="btn btn-secondary">Not now</button>
+        </div>
+    </div>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then((registration) => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch((registrationError) => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+    
+    <script src="app.js"></script>
+</body>
+</html>

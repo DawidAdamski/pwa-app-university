@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: memory-pwa
+  labels:
+    name: memory-pwa
+    app: memory-pwa
+
+

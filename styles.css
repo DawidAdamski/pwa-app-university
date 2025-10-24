@@ -1,0 +1,361 @@
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+    line-height: 1.6;
+}
+
+#app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.app-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.app-header h1 {
+    font-size: 2.5rem;
+    color: #2196F3;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.score-board {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.score-board > div {
+    background: #f8f9fa;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: bold;
+    color: #495057;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Main content */
+.game-container {
+    flex: 1;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+}
+
+.game-controls {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #2196F3, #21CBF3);
+    color: white;
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+}
+
+.btn-secondary {
+    background: linear-gradient(45deg, #6c757d, #868e96);
+    color: white;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+}
+
+/* Game board */
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    max-width: 600px;
+    width: 100%;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.game-card {
+    aspect-ratio: 1;
+    background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.game-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.game-card.flipped {
+    background: linear-gradient(45deg, #28a745, #20c997);
+    color: white;
+    transform: rotateY(180deg);
+}
+
+.game-card.matched {
+    background: linear-gradient(45deg, #ffc107, #fd7e14);
+    color: white;
+    animation: matchAnimation 0.6s ease;
+}
+
+.game-card.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.game-card::before {
+    content: '?';
+    font-size: 2rem;
+    font-weight: bold;
+    color: #6c757d;
+    transition: all 0.3s ease;
+}
+
+.game-card.flipped::before,
+.game-card.matched::before {
+    content: attr(data-symbol);
+    color: white;
+    font-size: 1.5rem;
+}
+
+/* Animations */
+@keyframes matchAnimation {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+@keyframes flipCard {
+    0% { transform: rotateY(0); }
+    50% { transform: rotateY(90deg); }
+    100% { transform: rotateY(180deg); }
+}
+
+.game-card.flipping {
+    animation: flipCard 0.6s ease;
+}
+
+/* Game message */
+.game-message {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.game-message.success {
+    background: linear-gradient(45deg, #28a745, #20c997);
+    color: white;
+}
+
+.game-message.error {
+    background: linear-gradient(45deg, #dc3545, #e83e8c);
+    color: white;
+}
+
+/* Footer */
+.app-footer {
+    background: rgba(255, 255, 255, 0.9);
+    text-align: center;
+    padding: 1rem;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.app-footer p {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* Install prompt */
+.install-prompt {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    transform: translateY(100px);
+    transition: transform 0.3s ease;
+}
+
+.install-prompt.show {
+    transform: translateY(0);
+}
+
+.install-content {
+    text-align: center;
+}
+
+.install-content h3 {
+    color: #2196F3;
+    margin-bottom: 0.5rem;
+}
+
+.install-content p {
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.install-content .btn {
+    margin: 0 0.5rem;
+}
+
+/* Utility classes */
+.hidden {
+    display: none !important;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .app-header h1 {
+        font-size: 2rem;
+    }
+    
+    .score-board {
+        gap: 1rem;
+    }
+    
+    .score-board > div {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.9rem;
+    }
+    
+    .game-container {
+        padding: 1rem;
+    }
+    
+    .game-board {
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 0.5rem;
+    }
+    
+    .game-card {
+        font-size: 0.8rem;
+    }
+    
+    .game-card::before {
+        font-size: 1.5rem;
+    }
+    
+    .game-card.flipped::before,
+    .game-card.matched::before {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .app-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .score-board {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .game-board {
+        grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    }
+    
+    .btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* PWA specific styles */
+@media (display-mode: standalone) {
+    .app-header {
+        padding-top: env(safe-area-inset-top);
+    }
+    
+    .app-footer {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    }
+    
+    .app-header,
+    .app-footer {
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+    }
+    
+    .score-board > div {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+    
+    .game-message {
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+    }
+}
